@@ -1,185 +1,187 @@
-# VIS_DEMO
+# VIS_SDK AND DEMO
 VIS sdk使用说明
 接口文件：include下IRtmpPublishPlayParent_c
 
 1,在自己的工程中包含include下的头文件，链接库lib的文件
 ---
-2,是自己的类继承IPublicPlayNotify并实现其方法
+2,接口和使用方法
 ---
 ```c++
-class MyClass: publick IPublicPlayNotify
+typedef enum RTMPMODEL{
+	RTMP_NULL = 0,
+	RTMP_PLAY,		// 播放参数
+	RTMP_PUBLISH	// 上麦参数
+}RtmpModel;
+
+// VIS 通知类
+class IPublicPlayNotify
 {
-    bool OnRtmpPublishOrPlayNotifyInJson(const char* pszJson){ 
-    // 处理vis回调的消息
-    return true; 
-    }
-}; 
+public:
+
+	/**
+	 * 接    口：OnRtmpPublishManagerMsg
+	 * 接口功能：上麦消息回调
+	 * 参    数：MsgLev	消息级别 MSG_DEBUG=0, MSG_WARNING=1, MSG_ERR=2
+	 *           pMsg	消息主体
+	 * 调    用：pszCmd { "cmd":"OnRtmpPublishManagerMsg", "params":{"MsgLev":1,"pMsg":"OnNotifyFail",} }
+	 **/
+
+	/**
+	 * 接    口：OnRtmpPlayManagerMsg
+	 * 接口功能：播放消息回调
+	 * 参    数：MsgLev	消息级别 MSG_DEBUG=0, MSG_WARNING=1, MSG_ERR=2
+	 *           pMsg	消息主体
+	 *           pDetail消息详细说明
+	 * 调    用：pszCmd { "cmd":"OnRtmpPlayManagerMsg", "params":{"MsgLev":1,"pMsg":"OnRtmpDead","pDetail":"NetConnection.Connect.Closed"} }
+	 **/
+
+	/**
+	 * 接    口：OnRtmpPublishPlayState
+	 * 接口功能：VIS启动状态回调
+	 * 参    数：MsgLev	消息级别 MSG_DEBUG=0, MSG_WARNING=1, MSG_ERR=2
+	 *           pMsg	消息主体
+	 *           pDetail消息详细说明
+	 * 调    用：pszCmd { "cmd":"OnRtmpPlayManagerMsg", "params":{"MsgLev":1,"pMsg":{"code":"-1",message:"varify faild",...},"pDetail":"NetConnection.Connect.Closed"} }
+	 **/
+
+	/**
+	 * 接口功能：JSON回调统一接口
+	 * 参    数：pszJson	JSON格式字符串
+	 * 返 回 值：成功/失败
+	 * 示    例：{ "cmd":"xxx", "params":{"x":true, "xx":12, "xxx":"abc"} }
+	 **/
+	virtual bool OnRtmpPublishOrPlayNotifyInJson(const char* pszJson){ return true; };
+};
+
+class IPublicPlay{
+public: 
+	//----------------------RTMP_PLAY模式开始-------------------------------------
+	/**
+	* 接    口：JSON调用统一接口 SetAdPara
+	* 接口功能：设置播放音量  （可以在播放过程中调用）
+	* 参	数：int uOutVolum,	音量
+	*			bool bMute		是否静音
+	* 调    用：pszCmd { "cmd":"SetAdPara", "params":{"uOutVolum":80,bMute:false} }
+	* 返回：无
+	**/	
+
+	/**
+	* 接    口：JSON调用统一接口 GetAudioPlayDevList
+	* 接口功能：获取播放设备列表 （必须在 SetPublishPlayAndStart 之前调用）
+	* 调    用：pszCmd { "cmd":"GetAudioPlayDevList", "params":{} }
+	* 成功返回：ppszRes { "code":0, "data":{"player":["dirsound", "guagua"]} }
+	* 失败返回：ppszRes { "code":1, "data":{} }
+	**/
+
+	/**
+	* 接    口：JSON调用统一接口 SetAudioPlayDev
+	* 接口功能：设置播放设备ID （必须在 SetPublishPlayAndStart 之前调用）
+	* 参	数：int uDevID      (播放设备ID(count from 0))
+	* 调    用：pszCmd { "cmd":"SetAudioPlayDev", "params":{"uDevID":1} }
+	* 成功返回：ppszRes { "code":0, "data":{} }
+	* 失败返回：ppszRes { "code":1, "data":{} }
+	**/
+
+	//----------------------RTMP_PLAY模式结束-------------------------------------
+
+	//----------------------RTMP_PUBLISH模式开始-------------------------------------
+
+
+
+	/**
+	 * 接    口：JSON调用统一接口 GetCamList
+	 * 接口功能：获取摄像头列表（必须在 StartPublish 之前调用）
+	 * 调    用：pszCmd { "cmd":"GetCamList", "params":{} }
+	 * 成功返回：ppszRes { "code":0, "data":{"cameras":["cam1", "cam2"]} }
+	 * 失败返回：ppszRes { "code":1, "data":{} }
+	 **/
+
+	/**
+	 * 接    口：JSON调用统一接口 GetMicList
+	 * 接口功能：获取摄像头列表（必须在 StartPublish 之前调用）
+	 * 调    用：pszCmd { "cmd":"GetMicList", "params":{} }
+	 * 成功返回：ppszRes { "code":0, "data":{"mics":["mic1", "mic2"]} }
+	 * 失败返回：ppszRes { "code":1, "data":{} }
+	 **/
+
+	/**
+	 * 接    口：JSON调用统一接口 SetCam
+	 * 接口功能：设置摄像头ID. （必须在 StartPublish 之前调用）
+	 * 参	 数：int uCamID 摄像头ID
+	 * 调    用：pszCmd { "cmd":"SetCam", "params":{"uCamID":0} }
+	 * 成功返回：ppszRes { "code":0, "data":{} }
+	 * 失败返回：ppszRes { "code":1, "data":{} }
+	 **/
+
+	/**
+	 * 接    口：JSON调用统一接口 SetMic
+	 * 接口功能：设置摄像头ID. （必须在 StartPublish 之前调用）
+	 * 参	 数：int uMicID 麦克风ID
+	 * 调    用：pszCmd { "cmd":"SetMic", "params":{"uMicID":0} }
+	 * 成功返回：ppszRes { "code":0, "data":{} }
+	 * 失败返回：ppszRes { "code":1, "data":{} }
+	 **/
+	
+	/**
+	 * 接    口：JSON调用统一接口 SetPublishVolum
+	 * 接口功能：设置设备捕获音量.（可以在发布过程中调用）
+	 * 参	 数：int uVolum,	音量.
+	 *			 bool bMute		是否静音
+	 * 调    用：pszCmd { "cmd":"SetPublishVolum", "params":{"uVolum":80,"bMute":false} }
+	 * 成功返回：ppszRes { "code":0, "data":{} }
+	 * 失败返回：ppszRes { "code":1, "data":{} }
+	 **/
+
+	//----------------------RTMP_PUBLISH模式结束-------------------------------------
+	/**
+	 * 接口功能：JSON调用统一接口
+	 * 参    数：mode 设置参数模式 
+	 *			 pszCmd	JSON格式命令
+	 *			 ppszRes JSON格式结果
+	 * 返 回 值：成功/失败
+	 * 示    例：mode   RTMP_PLAY 设置播放参数
+	 * 示    例：pszCmd { "cmd":"xxx", "params":{"x":true, "xx":12, "xxx":"abc"} }
+	 * 示    例：ppszRes { "code":0, "data":{"reason":"abc"} }
+	 * 说    明：code含义 0：success，1：fail
+	 **/
+	virtual bool CallInJson(RtmpModel model, const char* pszCmd, char** ppszRes) = 0;
+
+	/*
+	接口功能：	设置VIS参数（必须在 SetPublishPlayAndStart 之前调用）
+	参    数：	httpUrl VIS 请求地址
+				strPubApp VIS 使用的app
+				strPubStream VIS 使用的stream
+				strPassword  VIS 密码
+	返 回 值：	true -- 成功 	false -- 失败
+	*/
+
+	virtual bool SetPubPlayUrlPara(const char* httpUrl,const char* strPubApp,const char* strPubStream, const char* strPassword)=0;
+
+	/*
+	接口功能：	启动VIS
+	参    数：	hPlayVideo 播放句柄
+				hPublishVideo 上麦句柄
+	返 回 值：	true -- 成功 	false -- 失败
+	*/
+
+	virtual bool SetPublishPlayAndStart(HWND hPlayVideo, HWND hPublishVideo)=0;
+
+	/*
+	接口功能：	停止VIS
+	参    数：	无
+	返 回 值：	true -- 成功 	false -- 失败
+	*/
+
+	virtual bool StopPublishPlay()=0;
+
+	/*
+	接口功能：	释放VIS对象
+	参    数：	无
+	返 回 值：	无
+	*/
+
+	virtual void Release()=0;
+};
+
+extern "C" __declspec(dllexport) IPublicPlay* CreatePublicPlay(IPublicPlayNotify* pNotify); 
 ```
-3,使用CreatePublicPlay创建vis对象，
----
-```cpp
-m_pPublicPlay = CreatePublicPlay(this);
-```
-4,利用vis通用接口获取上麦的mi，cam 和播放设备并设置进去
-----  
-````cpp
- {// 
-    string strCmd;
-    m_jsonRoot.clear();
-    m_jsonParams.clear();
-    m_jsonRoot["cmd"] = Json::Value("GetCamList");
-    m_jsonRoot["params"] = m_jsonParams;
-    strCmd = m_jsonRoot.toStyledString();
-    char* pszRes = new char[1024];
-    if (!m_pPublicPlay->CallInJson(RTMP_PUBLISH, strCmd.c_str(), &pszRes))
-    {
-        return false;
-    }
-    // 解析PlayerList
-    Json::Reader reader;
-    Json::Value root;
-    Json::Value resRoot;
-    Json::Value data;
-
-    if (reader.parse(pszRes, root))
-    {
-        data = root["data"];
-        int size = data["cameras"].size();
-        for (unsigned int i = 0; i < size; i++)
-        {
-            m_ComboBoxVideo.InsertString(m_ComboBoxVideo.GetCount(),
-                ConvertString::s2ws(data["cameras"][i].asString()).c_str());
-        }
-        m_ComboBoxVideo.SetCurSel(0);
-    }
-
-    // mic 
-    m_jsonRoot.clear();
-    m_jsonParams.clear();
-    m_jsonRoot["cmd"] = Json::Value("GetMicList");
-    m_jsonRoot["params"] = m_jsonParams;
-    strCmd = m_jsonRoot.toStyledString();
-    memset(pszRes, 0, sizeof(pszRes));
-    if (!m_pPublicPlay->CallInJson(RTMP_PUBLISH, strCmd.c_str(), &pszRes))
-    {
-        return false;
-    }
-    if (reader.parse(pszRes, root))
-    {
-        data = root["data"];
-        int size = data["mics"].size();
-        for (unsigned int i = 0; i < size; i++)
-        {
-            m_ComboBoxMic.InsertString(m_ComboBoxMic.GetCount(),
-                ConvertString::s2ws(data["mics"][i].asString()).c_str());
-        }
-        m_ComboBoxMic.SetCurSel(0);
-    }
-
-
-    // AudioPlayer
-    m_jsonRoot.clear();
-    m_jsonParams.clear();
-    m_jsonRoot["cmd"] = Json::Value("GetAudioPlayDevList");
-    m_jsonRoot["params"] = m_jsonParams;
-    strCmd = m_jsonRoot.toStyledString();
-    memset(pszRes, 0, sizeof(pszRes));
-    if (!m_pPublicPlay->CallInJson(RTMP_PLAY, strCmd.c_str(), &pszRes))
-    {
-        return false;
-    }
-    // 解析PlayerList
-    if (reader.parse(pszRes, root))
-    {
-        data = root["data"];
-        int size = data["player"].size();
-        for (unsigned int i = 0; i < size; i++)
-        {
-            m_ComboBoxAudioPlay.InsertString(m_ComboBoxAudioPlay.GetCount(),
-                ConvertString::s2ws(data["player"][i].asString()).c_str());
-        }
-        m_ComboBoxAudioPlay.SetCurSel(0);
-    }
-
-    delete[] pszRes;
-    return true;
-}
-
-string strCmd;
-Json::Reader reader;
-Json::Value root;
-Json::Value resRoot;
-Json::Value data;
-char* pszRes = new char[1024];
-    int iDevId = m_ComboBoxAudioPlay.GetCurSel();
-    m_jsonRoot.clear();
-    m_jsonParams.clear();
-    m_jsonRoot["cmd"] = Json::Value("SetAudioPlayDev");
-    m_jsonParams["uDevID"] = Json::Value(iDevId);
-    m_jsonRoot["params"] = m_jsonParams;
-    strCmd = m_jsonRoot.toStyledString();
-    memset(pszRes, 0, sizeof(pszRes));
-    if (!m_pPublicPlay->CallInJson(RTMP_PLAY, strCmd.c_str(), &pszRes))
-    {
-        return;
-    }
-    // 解析PlayerList
-    if (reader.parse(pszRes, root))
-    {
-        data = root["code"];
-    }
-
-    //m_pPublicPlay->SetVdDisplayWnd(GetDlgItem(IDC_STATIC_PLAY)->m_hWnd);
-
-    int iCamId = m_ComboBoxVideo.GetCurSel();
-    int iMicId = m_ComboBoxMic.GetCurSel();
-    m_jsonRoot.clear();
-    m_jsonParams.clear();
-    m_jsonRoot["cmd"] = Json::Value("SetCam");
-    m_jsonParams["uCamID"] = Json::Value(iCamId);
-    m_jsonRoot["params"] = m_jsonParams;
-    strCmd = m_jsonRoot.toStyledString();
-    memset(pszRes, 0, sizeof(pszRes));
-    if (!m_pPublicPlay->CallInJson(RTMP_PUBLISH, strCmd.c_str(), &pszRes))
-    {
-        return;
-    }
-    // 解析PlayerList
-    if (reader.parse(pszRes, root))
-    {
-        data = root["code"];
-    }
-    //
-    m_jsonRoot.clear();
-    m_jsonParams.clear();
-    m_jsonRoot["cmd"] = Json::Value("SetMic");
-    m_jsonParams["uMicID"] = Json::Value(iMicId);
-    m_jsonRoot["params"] = m_jsonParams;
-    strCmd = m_jsonRoot.toStyledString();
-    memset(pszRes, 0, sizeof(pszRes));
-    if (!m_pPublicPlay->CallInJson(RTMP_PUBLISH, strCmd.c_str(), &pszRes))
-    {
-        return;
-    }
- ````   
-5,设置VIS地址，app和stream以及自己的密码
-----
-```cpp
- m_pPublicPlay->SetPubPlayUrlPara(m_strHttpPublishAddr.c_str(), m_strPublishApp.c_str(), m_strPublishStream.c_str(), m_strPublishPwd.c_str())
- ```
-     
-6,启动上麦  需要两个窗口句柄，一个publish，一个play 
----
-```cpp
-m_pPublicPlay->SetPublishPlayAndStart(GetDlgItem(IDC_STATIC_PLAY)->m_hWnd, GetDlgItem(IDC_STATIC_PUBLISH)->m_hWnd);
-```
-7,停止和销毁vis
----
-```cpp
-if (m_pPublicPlay)
-{
-    m_pPublicPlay->StopPublishPlay();
-    m_pPublicPlay->Release();
-    m_pPublicPlay = NULL;
-}
-...
