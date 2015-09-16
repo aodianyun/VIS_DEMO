@@ -305,8 +305,8 @@ BOOL CpubishPlayDemoDlg::PreTranslateMessage(MSG* pMsg)
 void CpubishPlayDemoDlg::SetDefaultPara()
 {
 	m_strHttpPublishAddr = "http://vis.aodianyun.com:5000/RequestPublish";
-	m_strPublishApp = "chenping";
-	m_strPublishStream = "stream";
+	m_strPublishApp = "demo";
+	m_strPublishStream = "visdemo";
 	m_strPublishPwd = "123456";
 	GetDlgItem(IDC_EDIT_PUBLISHADDR)->SetWindowTextW((ConvertString::s2ws(m_strHttpPublishAddr)).c_str());
 	GetDlgItem(IDC_EDIT_PUBLISHAPP)->SetWindowTextW(ConvertString::s2ws(m_strPublishApp).c_str());
@@ -315,8 +315,8 @@ void CpubishPlayDemoDlg::SetDefaultPara()
 
 	//play param
 	m_strPlayAddr = "rtmp://lssplay.aodianyun.com:1935";
-	m_strPlayApp = "cp";
-	m_strPlayStream = "stream";
+	m_strPlayApp = "demo";
+	m_strPlayStream = "visdemo";
 	GetDlgItem(IDC_EDIT_PLAYADDR)->SetWindowTextW((ConvertString::s2ws(m_strPlayAddr)).c_str());
 	GetDlgItem(IDC_EDIT_PLAYAPP)->SetWindowTextW(ConvertString::s2ws(m_strPlayApp).c_str());
 	GetDlgItem(IDC_EDIT_PLAYSTREAM)->SetWindowTextW(ConvertString::s2ws(m_strPlayStream).c_str());
